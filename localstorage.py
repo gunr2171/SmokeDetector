@@ -9,15 +9,15 @@ class LocalStorage:
     suffixes = {".p", ".pickle"}
 
     @staticmethod
-    def get_path(filename):
-        path = LocalStorage.root_path + filename
+    def get_path(filename, root=LocalStorage.root_path):
+        path = root + filename
         if "." + path.split(".")[-1] not in LocalStorage.suffixes:
             path = path.rstrip(".") + LocalStorage.suffix
         return path
 
     @staticmethod
-    def load(filename, encoding="utf-8"):
-        path = LocalStorage.get_path(filename)
+    def load(filename, encoding="utf-8", root=LocalStorage.root_path):
+        path = LocalStorage.get_path(filename, root=root)
         with open(path, "rb") as f:
             try:
                 data = pickle.load(f)
@@ -36,20 +36,20 @@ class LocalStorage:
         return data
 
     @staticmethod
-    def save(filename, data, protocol=pickle.HIGHEST_PROTOCOL):
-        path = LocalStorage.get_path(filename)
+    def save(filename, data, protocol=pickle.HIGHEST_PROTOCOL, root=LocalStorage.root_path):
+        path = LocalStorage.get_path(filename, root=root)
         with open(path, "wb") as f:
             pickle.dump(data, f, protocol=protocol)
 
     @staticmethod
-    def exist(filename):
-        return os.path.isfile(LocalStorage.get_path(filename))
+    def exist(filename, root=LocalStorage.root_path):
+        return os.path.isfile(LocalStorage.get_path(filename, root=root))
 
     @staticmethod
-    def load_if_exist(filename, default=None, encoding="utf-8"):
-        if not LocalStorage.exist(filename):
+    def load_if_exist(filename, default=None, encoding="utf-8", root=LocalStorage.root_path):
+        if not LocalStorage.exist(filename, root=root):
             return default
         try:
-            return LocalStorage.load(filename)
+            return LocalStorage.load(filename, root=root)
         except (UnicodeDecodeError, EOFError, pickle.UnpicklingError):
             return default
