@@ -40,3 +40,16 @@ class LocalStorage:
         path = LocalStorage.get_path(filename)
         with open(path, "wb") as f:
             pickle.dump(data, f, protocol=protocol)
+
+    @staticmethod
+    def exist(filename):
+        return os.path.isfile(LocalStorage.get_path(filename))
+
+    @staticmethod
+    def load_if_exist(filename, default=None, encoding="utf-8"):
+        if not LocalStorage.exist(filename):
+            return default
+        try:
+            return LocalStorage.load(filename)
+        except (UnicodeDecodeError, EOFError, pickle.UnpicklingError):
+            return default

@@ -12,7 +12,7 @@ import math
 import regex
 
 from globalvars import GlobalVars
-import blacklists
+from localstorage import LocalStorage
 
 last_feedbacked = None
 
@@ -23,54 +23,25 @@ class Any:
 
 
 def _load_pickle(path, encoding='utf-8'):
-    with open(path, mode="rb") as f:
-        try:
-            return pickle.load(f, encoding=encoding)
-        except UnicodeDecodeError:
-            os.remove(path)
-
-            if "apicalls" in path.lower():
-                return {}
-
-            if "bodyfetcher" in path.lower():
-                return {}
-        except EOFError:
-            os.remove(path)
-            raise
-        except pickle.UnpicklingError as err:
-            if 'pickle data was truncated' in str(err).lower():
-                os.remove(path)
-            raise
+    return LocalStorage.load(path, encoding)
 
 # methods to load files and filter data in them:
-# load_blacklists() is defined in a separate module blacklists.py, though
+# blacklists are loaded in findspam.py
 
 
 # methods to load files and filter data in them:
 def load_files():
-    if os.path.isfile("falsePositives.p"):
-        GlobalVars.false_positives = _load_pickle("falsePositives.p", encoding='utf-8')
-    if os.path.isfile("whitelistedUsers.p"):
-        GlobalVars.whitelisted_users = _load_pickle("whitelistedUsers.p", encoding='utf-8')
-    if os.path.isfile("blacklistedUsers.p"):
-        GlobalVars.blacklisted_users = _load_pickle("blacklistedUsers.p", encoding='utf-8')
-    if os.path.isfile("ignoredPosts.p"):
-        GlobalVars.ignored_posts = _load_pickle("ignoredPosts.p", encoding='utf-8')
-    if os.path.isfile("autoIgnoredPosts.p"):
-        GlobalVars.auto_ignored_posts = _load_pickle("autoIgnoredPosts.p", encoding='utf-8')
-    if os.path.isfile("notifications.p"):
-        GlobalVars.notifications = _load_pickle("notifications.p", encoding='utf-8')
-    if os.path.isfile("whyData.p"):
-        GlobalVars.why_data = _load_pickle("whyData.p", encoding='utf-8')
-    if os.path.isfile("apiCalls.p"):
-        GlobalVars.api_calls_per_site = _load_pickle("apiCalls.p", encoding='utf-8')
-    if os.path.isfile("bodyfetcherQueue.p"):
-        GlobalVars.bodyfetcher.queue = _load_pickle("bodyfetcherQueue.p", encoding='utf-8')
-    if os.path.isfile("bodyfetcherMaxIds.p"):
-        GlobalVars.bodyfetcher.previous_max_ids = _load_pickle("bodyfetcherMaxIds.p", encoding='utf-8')
-    if os.path.isfile("bodyfetcherQueueTimings.p"):
-        GlobalVars.bodyfetcher.queue_timings = _load_pickle("bodyfetcherQueueTimings.p", encoding='utf-8')
-    blacklists.load_blacklists()
+    GlobalVars.false_positives = LocalStorage.load_if_exist("falsePositives", [])
+    GlobalVars.whitelisted_users = LocalStorage.load_if_exist("whitelistedUsers", [])
+    GlobalVars.blacklisted_users = LocalStorage.load_if_exist("blacklistedUsers", [])
+    GlobalVars.ignored_posts = LocalStorage.load_if_exist("ignoredPosts", [])
+    GlobalVars.auto_ignored_posts = LocalStorage.load_if_exist("autoIgnoredPosts", [])
+    GlobalVars.notifications = LocalStorage.load_if_exist("notifications", [])
+    GlobalVars.why_data = LocalStorage.load_if_exist("whyData", [])
+    GlobalVars.api_calls_per_site = LocalStorage.load_if_exist("apiCalls", {})
+    GlobalVars.bodyfetcher.queue = LocalStorage.load_if_exist("bodyfetcherQueue", {})
+    GlobalVars.bodyfetcher.previous_max_ids = LocalStorage.load_if_exist("bodyfetcherMaxIds", {})
+    GlobalVars.bodyfetcher.queue_timings = LocalStorage.load_if_exist("bodyfetcherQueueTimings", {})
 
 
 def filter_auto_ignored_posts():
