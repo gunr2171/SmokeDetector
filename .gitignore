@@ -73,6 +73,9 @@ bodyfetcherMaxIds.p
 messageData.p
 deletionIDs.p
 
+# 3rd-gen pickle storage
+pickle/
+
 # Settings files
 .settings/
 
